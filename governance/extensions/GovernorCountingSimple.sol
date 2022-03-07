@@ -20,11 +20,16 @@ abstract contract GovernorCountingSimple is Governor {
         Abstain
     }
 
-    struct ProposalVote {
+    struct VoteCounts {
         uint256 againstVotes;
         uint256 forVotes;
         uint256 abstainVotes;
-        mapping(address => uint256) votesCast;
+    }
+
+    struct ProposalVote {
+        VoteCounts proposalVoteCounts;
+        mapping(address => uint256) addressTotalVoteCount;
+        mapping(address => VoteCounts) addressVoteCounts;
     }
 
     mapping(uint256 => ProposalVote) private _proposalVotes;
@@ -51,7 +56,24 @@ abstract contract GovernorCountingSimple is Governor {
         )
     {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
-        return (proposalvote.againstVotes, proposalvote.forVotes, proposalvote.abstainVotes);
+        return (proposalvote.proposalVoteCounts.againstVotes, proposalvote.proposalVoteCounts.forVotes, proposalvote.proposalVoteCounts.abstainVotes);
+    }
+
+    /**
+     * @dev Accessor to how many votes an address has cast.
+     */
+    function proposalAddressVotes(uint256 proposalId, address userAddress)
+        public
+        view
+        virtual
+        returns (
+            uint256 againstVotes,
+            uint256 forVotes,
+            uint256 abstainVotes
+        )
+    {
+        ProposalVote storage proposalvote = _proposalVotes[proposalId];
+        return (proposalvote.addressVoteCounts[userAddress].againstVotes, proposalvote.addressVoteCounts[userAddress].forVotes, proposalvote.addressVoteCounts[userAddress].abstainVotes);
     }
 
     /**
@@ -60,7 +82,7 @@ abstract contract GovernorCountingSimple is Governor {
     function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        return quorum(proposalSnapshot(proposalId)) <= proposalvote.forVotes + proposalvote.abstainVotes;
+        return quorum(proposalSnapshot(proposalId)) <= proposalvote.proposalVoteCounts.forVotes + proposalvote.proposalVoteCounts.abstainVotes;
     }
 
     /**
@@ -69,7 +91,7 @@ abstract contract GovernorCountingSimple is Governor {
     function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        return proposalvote.forVotes > proposalvote.againstVotes;
+        return proposalvote.proposalVoteCounts.forVotes > proposalvote.proposalVoteCounts.againstVotes;
     }
 
     /**
@@ -84,14 +106,19 @@ abstract contract GovernorCountingSimple is Governor {
     ) internal virtual override {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        require(numVotes <= (totalVotes - proposalvote.votesCast[account]), "GovernorVotingSimple: vote already cast");
+        require(numVotes <= (totalVotes - proposalvote.addressTotalVoteCount[account]), "GovernorVotingSimple: vote already cast");
+
+        proposalvote.addressTotalVoteCount[account] += numVotes;
 
         if (support == uint8(VoteType.Against)) {
-            proposalvote.againstVotes += numVotes;
+            proposalvote.proposalVoteCounts.againstVotes += numVotes;
+            proposalvote.addressVoteCounts[account].againstVotes += numVotes;
         } else if (support == uint8(VoteType.For)) {
-            proposalvote.forVotes += numVotes;
+            proposalvote.proposalVoteCounts.forVotes += numVotes;
+            proposalvote.addressVoteCounts[account].forVotes += numVotes;
         } else if (support == uint8(VoteType.Abstain)) {
-            proposalvote.abstainVotes += numVotes;
+            proposalvote.proposalVoteCounts.abstainVotes += numVotes;
+            proposalvote.addressVoteCounts[account].abstainVotes += numVotes;
         } else {
             revert("GovernorVotingSimple: invalid value for enum VoteType");
         }
