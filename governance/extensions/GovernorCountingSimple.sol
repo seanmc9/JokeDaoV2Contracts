@@ -106,7 +106,7 @@ abstract contract GovernorCountingSimple is Governor {
     ) internal virtual override {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        require(numVotes <= (totalVotes - proposalvote.addressTotalVoteCount[account]), "GovernorVotingSimple: vote already cast");
+        require(numVotes <= (totalVotes - proposalvote.addressTotalVoteCount[account]), "GovernorVotingSimple: not enough votes left to cast");
 
         proposalvote.addressTotalVoteCount[account] += numVotes;
 

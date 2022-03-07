@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "governance/Governor.sol";
-import "governance/extensions/GovernorSettings.sol";
-import "governance/extensions/GovernorCountingSimple.sol";
-import "governance/extensions/GovernorVotes.sol";
-import "governance/extensions/GovernorVotesQuorumFraction.sol";
+import "./governance/Governor.sol";
+import "./governance/extensions/GovernorSettings.sol";
+import "./governance/extensions/GovernorCountingSimple.sol";
+import "./governance/extensions/GovernorVotes.sol";
+import "./governance/extensions/GovernorVotesQuorumFraction.sol";
 
 contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction {
     constructor(IVotes _token)
