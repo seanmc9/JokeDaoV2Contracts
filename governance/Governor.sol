@@ -184,7 +184,8 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         uint256 proposalId,
         address account,
         uint8 support,
-        uint256 weight
+        uint256 numVotes,
+        uint256 totalVotes
     ) internal virtual;
 
     /**
@@ -302,9 +303,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     /**
      * @dev See {IGovernor-castVote}.
      */
-    function castVote(uint256 proposalId, uint8 support) public virtual override returns (uint256) {
+    function castVote(uint256 proposalId, uint8 support, uint256 numVotes) public virtual override returns (uint256) {
         address voter = _msgSender();
-        return _castVote(proposalId, voter, support, "");
+        return _castVote(proposalId, voter, support, numVotes, "");
     }
 
     /**
@@ -313,10 +314,11 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     function castVoteWithReason(
         uint256 proposalId,
         uint8 support,
+        uint256 numVotes,
         string calldata reason
     ) public virtual override returns (uint256) {
         address voter = _msgSender();
-        return _castVote(proposalId, voter, support, reason);
+        return _castVote(proposalId, voter, support, numVotes, reason);
     }
 
     /**
@@ -325,6 +327,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     function castVoteBySig(
         uint256 proposalId,
         uint8 support,
+        uint256 numVotes,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -335,7 +338,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
             r,
             s
         );
-        return _castVote(proposalId, voter, support, "");
+        return _castVote(proposalId, voter, support, numVotes, "");
     }
 
     /**
@@ -348,17 +351,18 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         uint256 proposalId,
         address account,
         uint8 support,
+        uint256 numVotes,
         string memory reason
     ) internal virtual returns (uint256) {
         ProposalCore storage proposal = _proposals[proposalId];
         require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
 
-        uint256 weight = getVotes(account, proposal.voteStart.getDeadline());
-        _countVote(proposalId, account, support, weight);
+        uint256 totalVotes = getVotes(account, proposal.voteStart.getDeadline());
+        _countVote(proposalId, account, support, numVotes, totalVotes);
 
-        emit VoteCast(account, proposalId, support, weight, reason);
+        emit VoteCast(account, proposalId, support, numVotes, reason);
 
-        return weight;
+        return totalVotes;
     }
 
     /**

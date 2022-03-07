@@ -52,7 +52,7 @@ abstract contract IGovernor is IERC165 {
      *
      * Note: `support` values should be seen as buckets. There interpretation depends on the voting module used.
      */
-    event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+    event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 numVotes, string reason);
 
     /**
      * @notice module:core
@@ -152,12 +152,6 @@ abstract contract IGovernor is IERC165 {
     function getVotes(address account, uint256 blockNumber) public view virtual returns (uint256);
 
     /**
-     * @notice module:voting
-     * @dev Returns weither `account` has cast a vote on `proposalId`.
-     */
-    function hasVoted(uint256 proposalId, address account) public view virtual returns (bool);
-
-    /**
      * @dev Create a new proposal. Vote start {IGovernor-votingDelay} blocks after the proposal is created and ends
      * {IGovernor-votingPeriod} blocks after the voting starts.
      *
@@ -190,7 +184,7 @@ abstract contract IGovernor is IERC165 {
      *
      * Emits a {VoteCast} event.
      */
-    function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256 balance);
+    function castVote(uint256 proposalId, uint8 support, uint256 numVotes) public virtual returns (uint256 balance);
 
     /**
      * @dev Cast a vote with a reason
@@ -200,6 +194,7 @@ abstract contract IGovernor is IERC165 {
     function castVoteWithReason(
         uint256 proposalId,
         uint8 support,
+        uint256 numVotes,
         string calldata reason
     ) public virtual returns (uint256 balance);
 
@@ -211,6 +206,7 @@ abstract contract IGovernor is IERC165 {
     function castVoteBySig(
         uint256 proposalId,
         uint8 support,
+        uint256 numVotes,
         uint8 v,
         bytes32 r,
         bytes32 s

@@ -24,7 +24,7 @@ abstract contract GovernorCountingSimple is Governor {
         uint256 againstVotes;
         uint256 forVotes;
         uint256 abstainVotes;
-        mapping(address => bool) hasVoted;
+        mapping(address => uint256) votesCast;
     }
 
     mapping(uint256 => ProposalVote) private _proposalVotes;
@@ -86,12 +86,12 @@ abstract contract GovernorCountingSimple is Governor {
         uint256 proposalId,
         address account,
         uint8 support,
-        uint256 weight
+        uint256 numVotes,
+        uint256 totalVotes
     ) internal virtual override {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        require(!proposalvote.hasVoted[account], "GovernorVotingSimple: vote already cast");
-        proposalvote.hasVoted[account] = true;
+        require(numVotes <= (totalVotes - proposalvote.votesCast[account]), "GovernorVotingSimple: vote already cast");
 
         if (support == uint8(VoteType.Against)) {
             proposalvote.againstVotes += weight;
