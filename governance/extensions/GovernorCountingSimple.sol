@@ -38,13 +38,6 @@ abstract contract GovernorCountingSimple is Governor {
     }
 
     /**
-     * @dev See {IGovernor-hasVoted}.
-     */
-    function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
-        return _proposalVotes[proposalId].hasVoted[account];
-    }
-
-    /**
      * @dev Accessor to the internal vote counts.
      */
     function proposalVotes(uint256 proposalId)
@@ -94,11 +87,11 @@ abstract contract GovernorCountingSimple is Governor {
         require(numVotes <= (totalVotes - proposalvote.votesCast[account]), "GovernorVotingSimple: vote already cast");
 
         if (support == uint8(VoteType.Against)) {
-            proposalvote.againstVotes += weight;
+            proposalvote.againstVotes += numVotes;
         } else if (support == uint8(VoteType.For)) {
-            proposalvote.forVotes += weight;
+            proposalvote.forVotes += numVotes;
         } else if (support == uint8(VoteType.Abstain)) {
-            proposalvote.abstainVotes += weight;
+            proposalvote.abstainVotes += numVotes;
         } else {
             revert("GovernorVotingSimple: invalid value for enum VoteType");
         }
