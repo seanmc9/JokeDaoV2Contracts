@@ -30,7 +30,7 @@ abstract contract GovernorCountingSimple is Governor {
     mapping(uint256 => ProposalVote) private _proposalVotes;
 
     /**
-     * @dev See {IGovernor-COUNTING_MODE}.
+     * @dev See {IGovernor-COUNTING_MODE}. 
      */
     // solhint-disable-next-line func-name-mixedcase
     function COUNTING_MODE() public pure virtual override returns (string memory) {
