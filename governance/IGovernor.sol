@@ -23,10 +23,6 @@ abstract contract IGovernor is IERC165 {
     event ProposalCreated(
         uint256 proposalId,
         address proposer,
-        address[] targets,
-        uint256[] values,
-        string[] signatures,
-        bytes[] calldatas,
         uint256 startBlock,
         uint256 endBlock,
         string description
@@ -85,10 +81,7 @@ abstract contract IGovernor is IERC165 {
      * @dev Hashing function used to (re)build the proposal id from the proposal details..
      */
     function hashProposal(
-        address[] calldata targets,
-        uint256[] calldata values,
-        bytes[] calldata calldatas,
-        bytes32 descriptionHash
+        string memory proposalDescription
     ) public pure virtual returns (uint256);
 
     /**

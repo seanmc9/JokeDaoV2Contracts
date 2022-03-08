@@ -99,12 +99,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      * governor) the proposer will have to change the description in order to avoid proposal id conflicts.
      */
     function hashProposal(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
+        string memory proposalDescription
     ) public pure virtual override returns (uint256) {
-        return uint256(keccak256(abi.encode(targets, values, calldatas, descriptionHash)));
+        return uint256(keccak256(abi.encode(proposalDescription)));
     }
 
     /**
@@ -172,21 +169,16 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      * @dev See {IGovernor-propose}.
      */
     function propose(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        string memory description
+        string memory proposalDescription
     ) public virtual override returns (uint256) {
         require(
             getVotes(msg.sender, block.number - 1) >= proposalThreshold(),
             "GovernorCompatibilityBravo: proposer votes below proposal threshold"
         );
 
-        uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+        uint256 proposalId = hashProposal(proposalDescription);
 
-        require(targets.length == values.length, "Governor: invalid proposal length");
-        require(targets.length == calldatas.length, "Governor: invalid proposal length");
-        require(targets.length > 0, "Governor: empty proposal");
+        require(proposalDescription != "", "Governor: empty proposal");
 
         ProposalCore storage proposal = _proposals[proposalId];
         require(proposal.voteStart.isUnset(), "Governor: proposal already exists");
@@ -200,13 +192,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         emit ProposalCreated(
             proposalId,
             _msgSender(),
-            targets,
-            values,
-            new string[](targets.length),
-            calldatas,
             snapshot,
             deadline,
-            description
+            proposalDescription
         );
 
         return proposalId;
@@ -219,12 +207,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      * Emits a {IGovernor-ProposalCanceled} event.
      */
     function _cancel(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
+        string memory proposalDescription
     ) internal virtual returns (uint256) {
-        uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+        uint256 proposalId = hashProposal(proposalDescription);
         ProposalState status = state(proposalId);
 
         require(
