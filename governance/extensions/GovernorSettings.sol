@@ -16,12 +16,14 @@ abstract contract GovernorSettings is Governor {
     uint256 private _votingDelay;
     uint256 private _votingPeriod;
     uint256 private _proposalThreshold;
+    uint256 private _maxProposalCount;
     Timers.BlockNumber private _voteStart;
 
     event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
     event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
     event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold);
     event VoteStartBlockSet(uint256 oldVoteStartBlock, uint64 newVoteStartBlock);
+    event MaxProposalCountSet(uint256 oldMaxProposalCount, uint256 newMaxProposalCount);
 
     /**
      * @dev Initialize the governance parameters.
@@ -30,12 +32,14 @@ abstract contract GovernorSettings is Governor {
         uint256 initialVotingDelay,
         uint256 initialVotingPeriod,
         uint256 initialProposalThreshold,
-        uint64  voteStartBlock
+        uint64  voteStartBlock,
+        uint256 initialMaxProposalCount
     ) {
         _setVotingDelay(initialVotingDelay);
         _setVotingPeriod(initialVotingPeriod);
         _setProposalThreshold(initialProposalThreshold);
         _setVoteStart(voteStartBlock);
+        _setMaxProposalCount(initialMaxProposalCount);
     }
 
     /**
@@ -57,6 +61,13 @@ abstract contract GovernorSettings is Governor {
      */
     function proposalThreshold() public view virtual override returns (uint256) {
         return _proposalThreshold;
+    }
+
+    /**
+     * @dev Max number of proposals allowed in this contest
+     */
+    function maxProposalCount() public view virtual override returns (uint256) {
+        return _maxProposalCount;
     }
 
     /**
@@ -96,6 +107,16 @@ abstract contract GovernorSettings is Governor {
     function _setProposalThreshold(uint256 newProposalThreshold) internal virtual {
         emit ProposalThresholdSet(_proposalThreshold, newProposalThreshold);
         _proposalThreshold = newProposalThreshold;
+    }
+
+    /**
+     * @dev Internal setter for the max proposal count.
+     *
+     * Emits a {MaxProposalCountSet} event.
+     */
+    function _setMaxProposalCount(uint256 newMaxProposalCount) internal virtual {
+        emit MaxProposalCountSet(_maxProposalCount, newMaxProposalCount);
+        _maxProposalCount = newMaxProposalCount;
     }
 
     /**

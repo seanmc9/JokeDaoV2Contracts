@@ -38,6 +38,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     string private _name;
     bool private _canceled;
     mapping(uint256 => ProposalCore) private _proposals;
+    mapping(address => bool) private _hasSubmitted;
 
 
     /**
@@ -156,6 +157,13 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     }
 
     /**
+     * @dev Max number of proposals allowed in this contest
+     */
+    function maxProposalCount() public view virtual returns (uint256) {
+        return 100;
+    }
+
+    /**
      * @dev Retrieve proposal data"_.
      */
     function getProposal(uint256 proposalId) public view virtual returns (ProposalCore memory) {
@@ -182,6 +190,8 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         string memory proposalDescription
     ) public virtual override returns (uint256) {
         require(state() == ContestState.Queued, "Governor: contest must be queued for proposals to be submitted");
+        require(_hasSubmitted[msg.sender] != true, "Governor: the same address cannot submit more than one proposal");
+        require(_proposalIds.length < maxProposalCount(), "Governor: the max number of proposals have been submitted");
         require(
             getVotes(msg.sender, block.number - 1) >= proposalThreshold(),
             "GovernorCompatibilityBravo: proposer votes below proposal threshold"
@@ -190,12 +200,11 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         require(bytes(proposalDescription).length != 0, "Governor: empty proposal");
 
         uint256 proposalId = hashProposal(proposalDescription);
-        // TODO: Allow ability to update proposals
         require(!_proposals[proposalId].exists, "Governor: duplicate proposals not allowed");
 
-        // TODO: Add require for number of proposals allowed in race
         _proposalIds.push(proposalId);
         _proposals[proposalId] = ProposalCore({author: msg.sender, description: proposalDescription, exists: true});
+        _hasSubmitted[msg.sender] = true;
 
         emit ProposalCreated(
             proposalId,
@@ -219,8 +228,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         );
 
         emit ContestCanceled();
-
-        // TODO: Delete all of the data from the contest
     }
 
     /**
