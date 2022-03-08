@@ -181,6 +181,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     function propose(
         string memory proposalDescription
     ) public virtual override returns (uint256) {
+        require(state() == ContestState.Queued, "Governor: contest must be queued for proposals to be submitted");
         require(
             getVotes(msg.sender, block.number - 1) >= proposalThreshold(),
             "GovernorCompatibilityBravo: proposer votes below proposal threshold"
