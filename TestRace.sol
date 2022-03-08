@@ -9,7 +9,7 @@ import "./governance/extensions/GovernorVotes.sol";
 contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes {
     constructor(IVotes _token)
         Governor("TestRace")
-        GovernorSettings(5 /* 1 minute */, 45 /* 10 minutes */, 1e18, 10000000)
+        GovernorSettings(5 /* 1 minute */, 45 /* 10 minutes */, 1e18, 10000000, 100)
         GovernorVotes(_token)
     {}
 
@@ -58,5 +58,14 @@ contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, Governo
         returns (uint256)
     {
         return super.proposalThreshold();
+    }
+
+    function maxProposalCount()
+        public
+        view
+        override(Governor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.maxProposalCount();
     }
 }
