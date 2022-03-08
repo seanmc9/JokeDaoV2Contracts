@@ -176,9 +176,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
             "GovernorCompatibilityBravo: proposer votes below proposal threshold"
         );
 
-        uint256 proposalId = hashProposal(proposalDescription);
+        require(bytes(proposalDescription).length != 0, "Governor: empty proposal");
 
-        require(proposalDescription != "", "Governor: empty proposal");
+        uint256 proposalId = hashProposal(proposalDescription);
 
         ProposalCore storage proposal = _proposals[proposalId];
         require(proposal.voteStart.isUnset(), "Governor: proposal already exists");

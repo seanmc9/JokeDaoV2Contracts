@@ -137,10 +137,7 @@ abstract contract IGovernor is IERC165 {
      * Emits a {ProposalCreated} event.
      */
     function propose(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        string memory description
+        string memory proposalDescription
     ) public virtual returns (uint256 proposalId);
 
     /**
