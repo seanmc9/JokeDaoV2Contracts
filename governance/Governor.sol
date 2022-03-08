@@ -9,7 +9,6 @@ import "../utils/introspection/ERC165.sol";
 import "../utils/math/SafeCast.sol";
 import "../utils/Address.sol";
 import "../utils/Context.sol";
-import "../utils/Timers.sol";
 import "./IGovernor.sol";
 
 /**
@@ -19,26 +18,27 @@ import "./IGovernor.sol";
  *
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {getVotes}
- * - Additionanly, the {votingPeriod} must also be implemented
+ * - Additionaly, the {votingPeriod} must also be implemented
  *
  * _Available since v4.3._
  */
 abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     using SafeCast for uint256;
-    using Timers for Timers.BlockNumber;
 
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
+    uint256[] public _proposalIds;
+
     struct ProposalCore {
-        Timers.BlockNumber voteStart;
-        Timers.BlockNumber voteEnd;
-        bool executed;
-        bool canceled;
+        address author;
+        string description;
+        bool exists;
     }
 
     string private _name;
-
+    bool private _canceled;
     mapping(uint256 => ProposalCore) private _proposals;
+
 
     /**
      * @dev Restrict access of functions to the governance executor, which may be the Governor itself or a timelock
@@ -107,42 +107,43 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     /**
      * @dev See {IGovernor-state}.
      */
-    function state(uint256 proposalId) public view virtual override returns (ProposalState) {
-        ProposalCore storage proposal = _proposals[proposalId];
-
-        if (proposal.canceled) {
-            return ProposalState.Canceled;
+    function state() public view virtual override returns (ContestState) {
+        if (_canceled) {
+            return ContestState.Canceled;
         }
 
-        uint256 snapshot = proposalSnapshot(proposalId);
-
-        if (snapshot == 0) {
-            revert("Governor: unknown proposal id");
-        }
+        uint256 snapshot = contestSnapshot();
 
         if (snapshot >= block.number) {
-            return ProposalState.Queued;
+            return ContestState.Queued;
         }
 
-        uint256 deadline = proposalDeadline(proposalId);
+        uint256 deadline = contestDeadline();
 
         if (deadline >= block.number) {
-            return ProposalState.Active;
+            return ContestState.Active;
         }
     }
 
     /**
-     * @dev See {IGovernor-proposalSnapshot}.
+     * @dev See {IGovernor-contestStart}.
      */
-    function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
-        return _proposals[proposalId].voteStart.getDeadline();
+    function contestStart() public view virtual override returns (uint256) {
+        return 0;
     }
 
     /**
-     * @dev See {IGovernor-proposalDeadline}.
+     * @dev See {IGovernor-contestSnapshot}.
      */
-    function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
-        return _proposals[proposalId].voteEnd.getDeadline();
+    function contestSnapshot() public view virtual override returns (uint256) {
+        return contestStart() + votingDelay();
+    }
+
+    /**
+     * @dev See {IGovernor-contestDeadline}.
+     */
+    function contestDeadline() public view virtual override returns (uint256) {
+        return contestSnapshot() + votingPeriod();
     }
 
     /**
@@ -150,6 +151,13 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      */
     function proposalThreshold() public view virtual returns (uint256) {
         return 0;
+    }
+
+    /**
+     * @dev Retrieve proposal data"_.
+     */
+    function getProposal(uint256 proposalId) public view virtual returns (ProposalCore memory) {
+        return _proposals[proposalId];
     }
 
     /**
@@ -179,21 +187,16 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         require(bytes(proposalDescription).length != 0, "Governor: empty proposal");
 
         uint256 proposalId = hashProposal(proposalDescription);
+        // TODO: Allow ability to update proposals
+        require(!_proposals[proposalId].exists, "Governor: duplicate proposals not allowed");
 
-        ProposalCore storage proposal = _proposals[proposalId];
-        require(proposal.voteStart.isUnset(), "Governor: proposal already exists");
-
-        uint64 snapshot = block.number.toUint64() + votingDelay().toUint64();
-        uint64 deadline = snapshot + votingPeriod().toUint64();
-
-        proposal.voteStart.setDeadline(snapshot);
-        proposal.voteEnd.setDeadline(deadline);
+        // TODO: Add require for number of proposals allowed in race
+        _proposalIds.push(proposalId);
+        _proposals[proposalId] = ProposalCore({author: msg.sender, description: proposalDescription, exists: true});
 
         emit ProposalCreated(
             proposalId,
             _msgSender(),
-            snapshot,
-            deadline,
             proposalDescription
         );
 
@@ -206,21 +209,15 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      *
      * Emits a {IGovernor-ProposalCanceled} event.
      */
-    function _cancel(
-        string memory proposalDescription
-    ) internal virtual returns (uint256) {
-        uint256 proposalId = hashProposal(proposalDescription);
-        ProposalState status = state(proposalId);
-
+    function cancel() public virtual onlyGovernance() {
         require(
-            status != ProposalState.Canceled,
-            "Governor: proposal not active"
+            state() != ContestState.Canceled,
+            "Governor: contest not active"
         );
-        _proposals[proposalId].canceled = true;
 
-        emit ProposalCanceled(proposalId);
+        emit ContestCanceled();
 
-        return proposalId;
+        // TODO: Delete all of the data from the contest
     }
 
     /**
@@ -277,11 +274,10 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         uint256 numVotes,
         string memory reason
     ) internal virtual returns (uint256) {
-        ProposalCore storage proposal = _proposals[proposalId];
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        require(numVotes > 0, "GovernorVotingSimple: cannot vote with 0 votes");
+        require(state() == ContestState.Active, "Governor: vote not currently active");
+        require(numVotes > 0, "GovernorVotingSimple: cannot vote with 0 or fewer votes");
 
-        uint256 totalVotes = getVotes(account, proposal.voteStart.getDeadline());
+        uint256 totalVotes = getVotes(account, contestSnapshot());
         _countVote(proposalId, account, support, numVotes, totalVotes);
 
         emit VoteCast(account, proposalId, support, numVotes, reason);

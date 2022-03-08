@@ -4,6 +4,7 @@
 pragma solidity ^0.8.0;
 
 import "../Governor.sol";
+import "../../utils/Timers.sol";
 
 /**
  * @dev Extension of {Governor} for settings updatable through governance.
@@ -11,13 +12,16 @@ import "../Governor.sol";
  * _Available since v4.4._
  */
 abstract contract GovernorSettings is Governor {
+    using Timers for Timers.BlockNumber;
     uint256 private _votingDelay;
     uint256 private _votingPeriod;
     uint256 private _proposalThreshold;
+    Timers.BlockNumber private _voteStart;
 
     event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
     event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
     event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold);
+    event VoteStartBlockSet(uint256 oldVoteStartBlock, uint64 newVoteStartBlock);
 
     /**
      * @dev Initialize the governance parameters.
@@ -25,11 +29,13 @@ abstract contract GovernorSettings is Governor {
     constructor(
         uint256 initialVotingDelay,
         uint256 initialVotingPeriod,
-        uint256 initialProposalThreshold
+        uint256 initialProposalThreshold,
+        uint64  voteStartBlock
     ) {
         _setVotingDelay(initialVotingDelay);
         _setVotingPeriod(initialVotingPeriod);
         _setProposalThreshold(initialProposalThreshold);
+        _setVoteStart(voteStart);
     }
 
     /**
@@ -54,30 +60,10 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
-     * @dev Update the voting delay. This operation can only be performed through a governance proposal.
-     *
-     * Emits a {VotingDelaySet} event.
+     * @dev See {IGovernor-contestSnapshot}.
      */
-    function setVotingDelay(uint256 newVotingDelay) public virtual onlyGovernance {
-        _setVotingDelay(newVotingDelay);
-    }
-
-    /**
-     * @dev Update the voting period. This operation can only be performed through a governance proposal.
-     *
-     * Emits a {VotingPeriodSet} event.
-     */
-    function setVotingPeriod(uint256 newVotingPeriod) public virtual onlyGovernance {
-        _setVotingPeriod(newVotingPeriod);
-    }
-
-    /**
-     * @dev Update the proposal threshold. This operation can only be performed through a governance proposal.
-     *
-     * Emits a {ProposalThresholdSet} event.
-     */
-    function setProposalThreshold(uint256 newProposalThreshold) public virtual onlyGovernance {
-        _setProposalThreshold(newProposalThreshold);
+    function contestStart() public view virtual override returns (uint256) {
+        return _voteStart.getDeadline();
     }
 
     /**
@@ -110,5 +96,15 @@ abstract contract GovernorSettings is Governor {
     function _setProposalThreshold(uint256 newProposalThreshold) internal virtual {
         emit ProposalThresholdSet(_proposalThreshold, newProposalThreshold);
         _proposalThreshold = newProposalThreshold;
+    }
+
+    /**
+     * @dev Internal setter for the voteStart.
+     *
+     * Emits a {ProposalThresholdSet} event.
+     */
+    function _setVoteStart(uint64 newVoteStartBlock) internal virtual {
+        emit VoteStartBlockSet(_voteStart.getDeadline(), newVoteStartBlock);
+        _voteStart.setDeadline(newVoteStartBlock);
     }
 }

@@ -11,7 +11,7 @@ import "../utils/introspection/ERC165.sol";
  * _Available since v4.3._
  */
 abstract contract IGovernor is IERC165 {
-    enum ProposalState {
+    enum ContestState {
         Active,
         Canceled,
         Queued
@@ -23,20 +23,13 @@ abstract contract IGovernor is IERC165 {
     event ProposalCreated(
         uint256 proposalId,
         address proposer,
-        uint256 startBlock,
-        uint256 endBlock,
         string description
     );
 
     /**
      * @dev Emitted when a proposal is canceled.
      */
-    event ProposalCanceled(uint256 proposalId);
-
-    /**
-     * @dev Emitted when a proposal is executed.
-     */
-    event ProposalExecuted(uint256 proposalId);
+    event ContestCanceled();
 
     /**
      * @dev Emitted when a vote is cast.
@@ -86,9 +79,15 @@ abstract contract IGovernor is IERC165 {
 
     /**
      * @notice module:core
-     * @dev Current state of a proposal, following Compound's convention
+     * @dev Current state of a Contest, following Compound's convention
      */
-    function state(uint256 proposalId) public view virtual returns (ProposalState);
+    function state() public view virtual returns (ContestState);
+
+    /**
+     * @notice module:core
+     * @dev Block number the contest started at.
+     */
+    function contestStart() public view virtual returns (uint256);
 
     /**
      * @notice module:core
@@ -96,14 +95,14 @@ abstract contract IGovernor is IERC165 {
      * ERC20Votes, the snapshot is performed at the end of this block. Hence, voting for this proposal starts at the
      * beginning of the following block.
      */
-    function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256);
+    function contestSnapshot() public view virtual returns (uint256);
 
     /**
      * @notice module:core
      * @dev Block number at which votes close. Votes close at the end of this block, so it is possible to cast a vote
      * during this block.
      */
-    function proposalDeadline(uint256 proposalId) public view virtual returns (uint256);
+    function contestDeadline() public view virtual returns (uint256);
 
     /**
      * @notice module:user-config
