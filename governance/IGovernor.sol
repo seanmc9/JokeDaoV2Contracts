@@ -12,14 +12,9 @@ import "../utils/introspection/ERC165.sol";
  */
 abstract contract IGovernor is IERC165 {
     enum ProposalState {
-        Pending,
         Active,
         Canceled,
-        Defeated,
-        Succeeded,
-        Queued,
-        Expired,
-        Executed
+        Queued
     }
 
     /**
@@ -134,15 +129,6 @@ abstract contract IGovernor is IERC165 {
     function votingPeriod() public view virtual returns (uint256);
 
     /**
-     * @notice module:user-config
-     * @dev Minimum number of cast voted required for a proposal to be successful.
-     *
-     * Note: The `blockNumber` parameter corresponds to the snaphot used for counting vote. This allows to scale the
-     * quroum depending on values such as the totalSupply of a token at this block (see {ERC20Votes}).
-     */
-    function quorum(uint256 blockNumber) public view virtual returns (uint256);
-
-    /**
      * @notice module:reputation
      * @dev Voting power of an `account` at a specific `blockNumber`.
      *
@@ -163,21 +149,6 @@ abstract contract IGovernor is IERC165 {
         bytes[] memory calldatas,
         string memory description
     ) public virtual returns (uint256 proposalId);
-
-    /**
-     * @dev Execute a successful proposal. This requires the quorum to be reached, the vote to be successful, and the
-     * deadline to be reached.
-     *
-     * Emits a {ProposalExecuted} event.
-     *
-     * Note: some module can modify the requirements for execution, for example by adding an additional timelock.
-     */
-    function execute(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) public payable virtual returns (uint256 proposalId);
 
     /**
      * @dev Cast a vote

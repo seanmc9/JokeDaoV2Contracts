@@ -113,10 +113,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     function state(uint256 proposalId) public view virtual override returns (ProposalState) {
         ProposalCore storage proposal = _proposals[proposalId];
 
-        if (proposal.executed) {
-            return ProposalState.Executed;
-        }
-
         if (proposal.canceled) {
             return ProposalState.Canceled;
         }
@@ -128,19 +124,13 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         }
 
         if (snapshot >= block.number) {
-            return ProposalState.Pending;
+            return ProposalState.Queued;
         }
 
         uint256 deadline = proposalDeadline(proposalId);
 
         if (deadline >= block.number) {
             return ProposalState.Active;
-        }
-
-        if (_quorumReached(proposalId) && _voteSucceeded(proposalId)) {
-            return ProposalState.Succeeded;
-        } else {
-            return ProposalState.Defeated;
         }
     }
 
@@ -164,16 +154,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     function proposalThreshold() public view virtual returns (uint256) {
         return 0;
     }
-
-    /**
-     * @dev Amount of votes already cast passes the threshold limit.
-     */
-    function _quorumReached(uint256 proposalId) internal view virtual returns (bool);
-
-    /**
-     * @dev Is the proposal successful or not.
-     */
-    function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
 
     /**
      * @dev Register a vote with a given support and voting weight.
@@ -233,48 +213,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     }
 
     /**
-     * @dev See {IGovernor-execute}.
-     */
-    function execute(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) public payable virtual override returns (uint256) {
-        uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
-        ProposalState status = state(proposalId);
-        require(
-            status == ProposalState.Succeeded || status == ProposalState.Queued,
-            "Governor: proposal not successful"
-        );
-        _proposals[proposalId].executed = true;
-
-        emit ProposalExecuted(proposalId);
-
-        _execute(proposalId, targets, values, calldatas, descriptionHash);
-
-        return proposalId;
-    }
-
-    /**
-     * @dev Internal execution mechanism. Can be overriden to implement different execution mechanism
-     */
-    function _execute(
-        uint256, /* proposalId */
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 /*descriptionHash*/
-    ) internal virtual {
-        string memory errorMessage = "Governor: call reverted without message";
-        for (uint256 i = 0; i < targets.length; ++i) {
-            (bool success, bytes memory returndata) = targets[i].call{value: values[i]}(calldatas[i]);
-            Address.verifyCallResult(success, returndata, errorMessage);
-        }
-    }
-
-    /**
      * @dev Internal cancel mechanism: locks up the proposal timer, preventing it from being re-submitted. Marks it as
      * canceled to allow distinguishing it from executed proposals.
      *
@@ -290,7 +228,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         ProposalState status = state(proposalId);
 
         require(
-            status != ProposalState.Canceled && status != ProposalState.Expired && status != ProposalState.Executed,
+            status != ProposalState.Canceled,
             "Governor: proposal not active"
         );
         _proposals[proposalId].canceled = true;
@@ -364,20 +302,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         emit VoteCast(account, proposalId, support, numVotes, reason);
 
         return totalVotes;
-    }
-
-    /**
-     * @dev Relays a transaction or function call to an arbitrary target. In cases where the governance executor
-     * is some contract other than the governor itself, like when using a timelock, this function can be invoked
-     * in a governance proposal to recover tokens or Ether that was sent to the governor contract by mistake.
-     * Note that if the executor is simply the governor itself, use of `relay` is redundant.
-     */
-    function relay(
-        address target,
-        uint256 value,
-        bytes calldata data
-    ) external virtual onlyGovernance {
-        Address.functionCallWithValue(target, data, value);
     }
 
     /**

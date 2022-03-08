@@ -77,24 +77,6 @@ abstract contract GovernorCountingSimple is Governor {
     }
 
     /**
-     * @dev See {Governor-_quorumReached}.
-     */
-    function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
-        ProposalVote storage proposalvote = _proposalVotes[proposalId];
-
-        return quorum(proposalSnapshot(proposalId)) <= proposalvote.proposalVoteCounts.forVotes + proposalvote.proposalVoteCounts.abstainVotes;
-    }
-
-    /**
-     * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
-     */
-    function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
-        ProposalVote storage proposalvote = _proposalVotes[proposalId];
-
-        return proposalvote.proposalVoteCounts.forVotes > proposalvote.proposalVoteCounts.againstVotes;
-    }
-
-    /**
      * @dev See {Governor-_countVote}. In this module, the support follows the `VoteType` enum (from Governor Bravo).
      */
     function _countVote(
