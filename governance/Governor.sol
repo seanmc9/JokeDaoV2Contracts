@@ -222,8 +222,10 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      * Emits a {IGovernor-ProposalCanceled} event.
      */
     function cancel() public virtual onlyGovernance() {
+        ContestState status = state();
+        
         require(
-            state() != ContestState.Canceled,
+            status != ContestState.Canceled && status != ContestState.Completed,
             "Governor: contest not active"
         );
 

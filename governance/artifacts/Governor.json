@@ -62,6 +62,7 @@
 			"getProposal(uint256)": "c7f758a8",
 			"getVotes(address,uint256)": "eb9019d4",
 			"hashProposal(string)": "bd65e80a",
+			"maxProposalCount()": "fb9bf8d4",
 			"name()": "06fdde03",
 			"proposalThreshold()": "b58131b0",
 			"propose(string)": "aa98df39",
@@ -416,6 +417,19 @@
 				}
 			],
 			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "maxProposalCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{

@@ -10,7 +10,7 @@ contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, Governo
     constructor(string memory _name, IVotes _token, uint256 _initialVotingDelay, uint256 _initialVotingPeriod,
                 uint256 _initialProposalThreshold, uint64 _voteStartBlock, uint256 _initialMaxProposalCount)
         Governor(_name)
-        GovernorSettings(_initialVotingPeriod /* 5 = 1 minute */, _initialVotingPeriod /* 45 = 10 minutes */, 
+        GovernorSettings(_initialVotingDelay /* 5 = 1 minute */, _initialVotingPeriod /* 45 = 10 minutes */, 
                          _initialProposalThreshold /* 1e18 = 1 token needed to vote */, _voteStartBlock,
                         _initialMaxProposalCount)
         GovernorVotes(_token)

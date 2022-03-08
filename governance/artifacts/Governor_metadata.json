@@ -352,6 +352,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "maxProposalCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "name",
 				"outputs": [
 					{
@@ -511,6 +524,9 @@
 				"hashProposal(string)": {
 					"details": "See {IGovernor-hashProposal}. The proposal id is produced by hashing the RLC encoded `targets` array, the `values` array, the `calldatas` array and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in advance, before the proposal is submitted. Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the same proposal (with same operation and same description) will have the same id if submitted on multiple governors accross multiple networks. This also means that in order to execute the same operation twice (on the same governor) the proposer will have to change the description in order to avoid proposal id conflicts."
 				},
+				"maxProposalCount()": {
+					"details": "Max number of proposals allowed in this contest"
+				},
 				"name()": {
 					"details": "See {IGovernor-name}."
 				},
@@ -574,11 +590,11 @@
 	},
 	"sources": {
 		"governance/Governor.sol": {
-			"keccak256": "0x71977108cfee98e3100a8deb6131419677c2be8ee71a8a0eeac3a793c604f163",
+			"keccak256": "0x5dae0e30f8dc89c788302d14482ca3a4b9f184c791081835f15b1f7c7376fdf3",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://af14f447fd990a8b98ba15c081963fd80725cf33f712f876abeec98d2dcdba5d",
-				"dweb:/ipfs/QmQLHfoGZp15TWPR9hfjdBwhyL5ESpr5eZnvChFefg3WFa"
+				"bzz-raw://bec7ff2e944912ccdd04b91d15b06bafd565098e9699cdecee41ea2c99c4f472",
+				"dweb:/ipfs/QmQT6M5oZtAqhohxqTd1kFGbFRamakHgnGCxS31DTer1Jw"
 			]
 		},
 		"governance/IGovernor.sol": {
