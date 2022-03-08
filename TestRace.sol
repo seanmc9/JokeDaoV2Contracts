@@ -5,14 +5,12 @@ import "./governance/Governor.sol";
 import "./governance/extensions/GovernorSettings.sol";
 import "./governance/extensions/GovernorCountingSimple.sol";
 import "./governance/extensions/GovernorVotes.sol";
-import "./governance/extensions/GovernorVotesQuorumFraction.sol";
 
-contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction {
+contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes {
     constructor(IVotes _token)
         Governor("TestRace")
         GovernorSettings(5 /* 1 minute */, 45 /* 10 minutes */, 1e18)
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(5)
     {}
 
     // The following functions are overrides required by Solidity.
@@ -33,15 +31,6 @@ contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, Governo
         returns (uint256)
     {
         return super.votingPeriod();
-    }
-
-    function quorum(uint256 blockNumber)
-        public
-        view
-        override(IGovernor, GovernorVotesQuorumFraction)
-        returns (uint256)
-    {
-        return super.quorum(blockNumber);
     }
 
     function getVotes(address account, uint256 blockNumber)
