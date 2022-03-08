@@ -28,6 +28,25 @@
 					{
 						"indexed": false,
 						"internalType": "uint256",
+						"name": "oldMaxProposalCount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newMaxProposalCount",
+						"type": "uint256"
+					}
+				],
+				"name": "MaxProposalCountSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
 						"name": "proposalId",
 						"type": "uint256"
 					},
@@ -439,6 +458,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "maxProposalCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "name",
 				"outputs": [
 					{
@@ -711,19 +743,19 @@
 	},
 	"sources": {
 		"TestRace.sol": {
-			"keccak256": "0x28d623a1a30456538a233e0552fd72ef5d7fa445d5df591742a55eaf87561647",
+			"keccak256": "0x91204ac2ac8e6f566ef5533713d6f0f8cd8c08bb3b0642ab15c1c34c0c64e2a4",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://df090593aeb8586ea87a8d1fc3ef87c6280d6e64c992ab6039e4cef2c66fd259",
-				"dweb:/ipfs/QmXDve9E7eZS2m4KMFYrbipK9M55gtqfpjFDXUs8VWbeyt"
+				"bzz-raw://872ecd5062ccbc416b60b87a566a5c471ca732e3b2b4562320f404e58413ad70",
+				"dweb:/ipfs/QmRryPZ6FKgYGWYG6YwLtD7ywctzmCi1kTLcN5LYpWXmfW"
 			]
 		},
 		"governance/Governor.sol": {
-			"keccak256": "0x71977108cfee98e3100a8deb6131419677c2be8ee71a8a0eeac3a793c604f163",
+			"keccak256": "0x161a156ad5b91cb48268eef64dc464dc4de734af2c69e1ac6d8031b5c36d3c51",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://af14f447fd990a8b98ba15c081963fd80725cf33f712f876abeec98d2dcdba5d",
-				"dweb:/ipfs/QmQLHfoGZp15TWPR9hfjdBwhyL5ESpr5eZnvChFefg3WFa"
+				"bzz-raw://6f12a63e1ddd224a7ecbf3ccb41c0377a06f2cefb2da81a3b7958af181402c9d",
+				"dweb:/ipfs/QmdWZNwGaU6QtXA8AEnDWVQwP5kYnPF4yCT5csxhJGs9u7"
 			]
 		},
 		"governance/IGovernor.sol": {
@@ -743,11 +775,11 @@
 			]
 		},
 		"governance/extensions/GovernorSettings.sol": {
-			"keccak256": "0xaa41b3da048abbd7631f96fb5d38cb81de0fbed231a6556dfb40601f7b098348",
+			"keccak256": "0xa85a300d1b311cb65838cff5f215794524785c843c4d0c80c73048f073588001",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://9cc62b3f6818d612b1222fae1b927df6cfd84856a2738e7f3be057ae1e3f1936",
-				"dweb:/ipfs/QmSR1Q9cBP6VgVxJDBjWp5a2mjMhkRHiCYURv82DycPkxu"
+				"bzz-raw://1dc90f44fb8c4a30b42520634d139e0263ac9950d424938de02fd0d600baf478",
+				"dweb:/ipfs/QmQ4WcCm4sFJHCBdy7sBBkMHDnqTR39maPuUgRsgFcN1uS"
 			]
 		},
 		"governance/extensions/GovernorVotes.sol": {
