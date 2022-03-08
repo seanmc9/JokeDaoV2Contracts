@@ -7,9 +7,12 @@ import "./governance/extensions/GovernorCountingSimple.sol";
 import "./governance/extensions/GovernorVotes.sol";
 
 contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes {
-    constructor(IVotes _token)
-        Governor("TestRace")
-        GovernorSettings(5 /* 1 minute */, 45 /* 10 minutes */, 1e18, 10000000, 100)
+    constructor(string memory _name, IVotes _token, uint256 _initialVotingDelay, uint256 _initialVotingPeriod,
+                uint256 _initialProposalThreshold, uint64 _voteStartBlock, uint256 _initialMaxProposalCount)
+        Governor(_name)
+        GovernorSettings(_initialVotingPeriod /* 5 = 1 minute */, _initialVotingPeriod /* 45 = 10 minutes */, 
+                         _initialProposalThreshold /* 1e18 = 1 token needed to vote */, _voteStartBlock,
+                        _initialMaxProposalCount)
         GovernorVotes(_token)
     {}
 

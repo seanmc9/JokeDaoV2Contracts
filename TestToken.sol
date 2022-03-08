@@ -6,7 +6,9 @@ import "./token/ERC20/extensions/draft-ERC20Permit.sol";
 import "./token/ERC20/extensions/ERC20Votes.sol";
 
 contract TestToken is ERC20, ERC20Permit, ERC20Votes {
-    constructor() ERC20("TestToken", "TEST") ERC20Permit("TestToken") {}
+    constructor() ERC20("TestToken", "TEST") ERC20Permit("TestToken") {
+        _mint(msg.sender, 10000 * 10 ** decimals());
+    }
 
     // The following functions are overrides required by Solidity.
 
