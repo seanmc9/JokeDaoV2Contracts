@@ -123,6 +123,8 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         if (deadline >= block.number) {
             return ContestState.Active;
         }
+
+        return ContestState.Completed;
     }
 
     /**

@@ -6,17 +6,6 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [
-					{
-						"internalType": "contract IVotes",
-						"name": "_token",
-						"type": "address"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "constructor"
-			},
-			{
 				"anonymous": false,
 				"inputs": [],
 				"name": "ContestCanceled",
@@ -451,75 +440,12 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "proposalId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "userAddress",
-						"type": "address"
-					}
-				],
-				"name": "proposalAddressVotes",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "againstVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "forVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "abstainVotes",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [],
 				"name": "proposalThreshold",
 				"outputs": [
 					{
 						"internalType": "uint256",
 						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "proposalId",
-						"type": "uint256"
-					}
-				],
-				"name": "proposalVotes",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "againstVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "forVotes",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "abstainVotes",
 						"type": "uint256"
 					}
 				],
@@ -579,19 +505,6 @@
 			},
 			{
 				"inputs": [],
-				"name": "token",
-				"outputs": [
-					{
-						"internalType": "contract IVotes",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "version",
 				"outputs": [
 					{
@@ -635,10 +548,11 @@
 			}
 		],
 		"devdoc": {
+			"details": "Extension of {Governor} for settings updatable through governance. _Available since v4.4._",
 			"kind": "dev",
 			"methods": {
 				"COUNTING_MODE()": {
-					"details": "See {IGovernor-COUNTING_MODE}. "
+					"details": "A description of the possible `support` values for {castVote} and the way these votes are counted, meant to be consumed by UIs to show correct vote options and interpret the results. The string is a URL-encoded sequence of key-value pairs that each describe one aspect, for example `support=bravo&quorum=for,abstain`. There are 2 standard keys: `support` and `quorum`. - `support=bravo` refers to the vote options 0 = Against, 1 = For, 2 = Abstain, as in `GovernorBravo`. - `quorum=bravo` means that only For votes are counted towards quorum. - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum. NOTE: The string can be decoded by the standard https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams[`URLSearchParams`] JavaScript class."
 				},
 				"cancel()": {
 					"details": "Internal cancel mechanism: locks up the proposal timer, preventing it from being re-submitted. Marks it as canceled to allow distinguishing it from executed proposals. Emits a {IGovernor-ProposalCanceled} event."
@@ -652,14 +566,23 @@
 				"castVoteWithReason(uint256,uint8,uint256,string)": {
 					"details": "See {IGovernor-castVoteWithReason}."
 				},
+				"constructor": {
+					"details": "Initialize the governance parameters."
+				},
 				"contestDeadline()": {
 					"details": "See {IGovernor-contestDeadline}."
 				},
 				"contestSnapshot()": {
 					"details": "See {IGovernor-contestSnapshot}."
 				},
+				"contestStart()": {
+					"details": "See {IGovernor-contestSnapshot}."
+				},
 				"getProposal(uint256)": {
 					"details": "Retrieve proposal data\"_."
+				},
+				"getVotes(address,uint256)": {
+					"details": "Voting power of an `account` at a specific `blockNumber`. Note: this can be implemented in a number of ways, for example by reading the delegated balance from one (or multiple), {ERC20Votes} tokens."
 				},
 				"hashProposal(string)": {
 					"details": "See {IGovernor-hashProposal}. The proposal id is produced by hashing the RLC encoded `targets` array, the `values` array, the `calldatas` array and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in advance, before the proposal is submitted. Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the same proposal (with same operation and same description) will have the same id if submitted on multiple governors accross multiple networks. This also means that in order to execute the same operation twice (on the same governor) the proposer will have to change the description in order to avoid proposal id conflicts."
@@ -667,11 +590,8 @@
 				"name()": {
 					"details": "See {IGovernor-name}."
 				},
-				"proposalAddressVotes(uint256,address)": {
-					"details": "Accessor to how many votes an address has cast."
-				},
-				"proposalVotes(uint256)": {
-					"details": "Accessor to the internal vote counts."
+				"proposalThreshold()": {
+					"details": "See {Governor-proposalThreshold}."
 				},
 				"propose(string)": {
 					"details": "See {IGovernor-propose}."
@@ -684,19 +604,32 @@
 				},
 				"version()": {
 					"details": "See {IGovernor-version}."
+				},
+				"votingDelay()": {
+					"details": "See {IGovernor-votingDelay}."
+				},
+				"votingPeriod()": {
+					"details": "See {IGovernor-votingPeriod}."
 				}
 			},
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"COUNTING_MODE()": {
+					"notice": "module:voting"
+				},
+				"getVotes(address,uint256)": {
+					"notice": "module:reputation"
+				}
+			},
 			"version": 1
 		}
 	},
 	"settings": {
 		"compilationTarget": {
-			"TestRace.sol": "TestRace"
+			"governance/extensions/GovernorSettings.sol": "GovernorSettings"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -710,36 +643,20 @@
 		"remappings": []
 	},
 	"sources": {
-		"TestRace.sol": {
-			"keccak256": "0x28d623a1a30456538a233e0552fd72ef5d7fa445d5df591742a55eaf87561647",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://df090593aeb8586ea87a8d1fc3ef87c6280d6e64c992ab6039e4cef2c66fd259",
-				"dweb:/ipfs/QmXDve9E7eZS2m4KMFYrbipK9M55gtqfpjFDXUs8VWbeyt"
-			]
-		},
 		"governance/Governor.sol": {
-			"keccak256": "0x71977108cfee98e3100a8deb6131419677c2be8ee71a8a0eeac3a793c604f163",
+			"keccak256": "0x3e3c18b447ee696fcdf0ed0bab53e50e59885b3a50e103bdbf56d664dbe26cdf",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://af14f447fd990a8b98ba15c081963fd80725cf33f712f876abeec98d2dcdba5d",
-				"dweb:/ipfs/QmQLHfoGZp15TWPR9hfjdBwhyL5ESpr5eZnvChFefg3WFa"
+				"bzz-raw://fa8527d8c3bbbcc9a8cf23a079f5b818029261813cc6f6a5bb64fc584dd0dce7",
+				"dweb:/ipfs/QmaMDGgNPAX2GJgV6aZg3xwMSJh7wFpYojTpUNidLrXe76"
 			]
 		},
 		"governance/IGovernor.sol": {
-			"keccak256": "0xc113bfae669169ce5f658982caebb6475edf08ba08d8c91201ce0115c440666a",
+			"keccak256": "0x3c004f92e8eb46dbe86fca6a994862d540ba8017bfbc6f1673707c02355ee36b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0991e113520a68a430d752110b7a3d3a3b2972c0ed00b83db0c387d4aff2f70c",
-				"dweb:/ipfs/QmeGPSc36bzq5DTCNhgnBf6YHawNBTa2TyxHdF2E1QmorN"
-			]
-		},
-		"governance/extensions/GovernorCountingSimple.sol": {
-			"keccak256": "0x3deebd826b1a33923e7e5af51a1cab2461814f58d025a5641cd261b42afac2aa",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://f53c9cf7de87a8767e17ba0048cff01fb36acbd1b24a780108f84e93887d0175",
-				"dweb:/ipfs/QmW9pVWK68wJtt5qEtcocftsefB67oSUnYfGbceg9AhW5u"
+				"bzz-raw://2598ed1b495e65be1a8867ced677d5b41c574a216ad6e7fcb0cbf263c3b0d9d1",
+				"dweb:/ipfs/QmfXPz7gXaPFbwT2j4eXLg3azocGL5cJK2eWs794CuRsb8"
 			]
 		},
 		"governance/extensions/GovernorSettings.sol": {
@@ -748,22 +665,6 @@
 			"urls": [
 				"bzz-raw://9cc62b3f6818d612b1222fae1b927df6cfd84856a2738e7f3be057ae1e3f1936",
 				"dweb:/ipfs/QmSR1Q9cBP6VgVxJDBjWp5a2mjMhkRHiCYURv82DycPkxu"
-			]
-		},
-		"governance/extensions/GovernorVotes.sol": {
-			"keccak256": "0x8f181616d38bc85021c06f1b3acce5ee05339864416b2d328948fb46a378c77f",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://e67f3acc42fc19f8c7ed2f56c3d881bfa771b1ce2854e1100a086dc0b6cb5b30",
-				"dweb:/ipfs/QmPAd8sy6t5Ck3wC7WyzECbVGYPfV6WNius4UoH2rzc7yp"
-			]
-		},
-		"governance/utils/IVotes.sol": {
-			"keccak256": "0xf5324a55ee9c0b4a840ea57c055ac9d046f88986ceef567e1cf68113e46a79c0",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://f41fe2bddc33c17ccccfc25379b1869354e9ee62d8b28d2acc95229eeba37a86",
-				"dweb:/ipfs/Qmb6SF2XL2uSvH6k5JSjtx4Xoqz41ACkhdAhtbW1Yh3RiY"
 			]
 		},
 		"utils/Address.sol": {

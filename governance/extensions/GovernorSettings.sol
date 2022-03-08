@@ -35,7 +35,7 @@ abstract contract GovernorSettings is Governor {
         _setVotingDelay(initialVotingDelay);
         _setVotingPeriod(initialVotingPeriod);
         _setProposalThreshold(initialProposalThreshold);
-        _setVoteStart(voteStart);
+        _setVoteStart(voteStartBlock);
     }
 
     /**

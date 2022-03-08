@@ -14,7 +14,8 @@ abstract contract IGovernor is IERC165 {
     enum ContestState {
         Active,
         Canceled,
-        Queued
+        Queued,
+        Completed
     }
 
     /**
