@@ -127,6 +127,13 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
 
         return ContestState.Completed;
     }
+    
+    /**
+     * @dev Return all proposals.
+     */
+    function getAllProposalIds() public view virtual returns (uint256[] memory) {
+        return _proposalIds;
+    }
 
     /**
      * @dev See {IGovernor-contestStart}.
