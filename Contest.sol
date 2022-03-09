@@ -62,4 +62,22 @@ contract Contest is Governor, GovernorSettings, GovernorCountingSimple, Governor
     {
         return super.maxProposalCount();
     }
+
+    function contestStart()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.contestStart();
+    }
+
+    function owner()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (address)
+    {
+        return super.owner();
+    }
 }
