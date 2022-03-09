@@ -18,12 +18,14 @@ abstract contract GovernorSettings is Governor {
     uint256 private _proposalThreshold;
     uint256 private _maxProposalCount;
     Timers.BlockNumber private _voteStart;
+    address private _owner;
 
     event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
     event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
     event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold);
     event VoteStartBlockSet(uint256 oldVoteStartBlock, uint64 newVoteStartBlock);
     event MaxProposalCountSet(uint256 oldMaxProposalCount, uint256 newMaxProposalCount);
+    event OwnerSet(address oldOwner, address newOwner);
 
     /**
      * @dev Initialize the governance parameters.
@@ -40,6 +42,7 @@ abstract contract GovernorSettings is Governor {
         _setProposalThreshold(initialProposalThreshold);
         _setVoteStart(voteStartBlock);
         _setMaxProposalCount(initialMaxProposalCount);
+        _setOwner(msg.sender);
     }
 
     /**
@@ -71,10 +74,17 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
-     * @dev See {IGovernor-contestSnapshot}.
+     * @dev See {IGovernor-contestStart}.
      */
     function contestStart() public view virtual override returns (uint256) {
         return _voteStart.getDeadline();
+    }
+
+    /**
+     * @dev See {IGovernor-owner}.
+     */
+    function owner() public view virtual override returns (address) {
+        return _owner;
     }
 
     /**
@@ -127,5 +137,15 @@ abstract contract GovernorSettings is Governor {
     function _setVoteStart(uint64 newVoteStartBlock) internal virtual {
         emit VoteStartBlockSet(_voteStart.getDeadline(), newVoteStartBlock);
         _voteStart.setDeadline(newVoteStartBlock);
+    }
+
+    /**
+     * @dev Internal setter for owner.
+     *
+     * Emits a {OwnerSet} event.
+     */
+    function _setOwner(address newOwner) internal virtual {
+        emit OwnerSet(_owner, newOwner);
+        _owner = (newOwner);
     }
 }

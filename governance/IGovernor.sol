@@ -92,6 +92,12 @@ abstract contract IGovernor is IERC165 {
 
     /**
      * @notice module:core
+     * @dev Owner of the contest, has the power to cancel.
+     */
+    function owner() public view virtual returns (address);
+
+    /**
+     * @notice module:core
      * @dev Block number used to retrieve user's votes and quorum. As per Compound's Comp and OpenZeppelin's
      * ERC20Votes, the snapshot is performed at the end of this block. Hence, voting for this proposal starts at the
      * beginning of the following block.
