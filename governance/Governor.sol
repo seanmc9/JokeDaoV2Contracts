@@ -230,6 +230,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
             status != ContestState.Canceled && status != ContestState.Completed,
             "Governor: contest not active"
         );
+        _canceled = true;
 
         emit ContestCanceled();
     }
