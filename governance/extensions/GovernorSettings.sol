@@ -146,6 +146,6 @@ abstract contract GovernorSettings is Governor {
      */
     function _setOwner(address newOwner) internal virtual {
         emit OwnerSet(_owner, newOwner);
-        _owner = (newOwner);
+        _owner = newOwner;
     }
 }
