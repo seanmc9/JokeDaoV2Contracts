@@ -15,15 +15,11 @@ abstract contract GovernorCountingSimple is Governor {
      * @dev Supported vote types. Matches Governor Bravo ordering.
      */
     enum VoteType {
-        Against,
-        For,
-        Abstain
+        For
     }
 
     struct VoteCounts {
-        uint256 againstVotes;
         uint256 forVotes;
-        uint256 abstainVotes;
     }
 
     struct ProposalVote {
@@ -50,13 +46,11 @@ abstract contract GovernorCountingSimple is Governor {
         view
         virtual
         returns (
-            uint256 againstVotes,
-            uint256 forVotes,
-            uint256 abstainVotes
+            uint256 forVotes
         )
     {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
-        return (proposalvote.proposalVoteCounts.againstVotes, proposalvote.proposalVoteCounts.forVotes, proposalvote.proposalVoteCounts.abstainVotes);
+        return (proposalvote.proposalVoteCounts.forVotes);
     }
 
     /**
@@ -67,13 +61,11 @@ abstract contract GovernorCountingSimple is Governor {
         view
         virtual
         returns (
-            uint256 againstVotes,
-            uint256 forVotes,
-            uint256 abstainVotes
+            uint256 forVotes
         )
     {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
-        return (proposalvote.addressVoteCounts[userAddress].againstVotes, proposalvote.addressVoteCounts[userAddress].forVotes, proposalvote.addressVoteCounts[userAddress].abstainVotes);
+        return (proposalvote.addressVoteCounts[userAddress].forVotes);
     }
 
     /**
@@ -92,15 +84,9 @@ abstract contract GovernorCountingSimple is Governor {
 
         proposalvote.addressTotalVoteCount[account] += numVotes;
 
-        if (support == uint8(VoteType.Against)) {
-            proposalvote.proposalVoteCounts.againstVotes += numVotes;
-            proposalvote.addressVoteCounts[account].againstVotes += numVotes;
-        } else if (support == uint8(VoteType.For)) {
+        if (support == uint8(VoteType.For)) {
             proposalvote.proposalVoteCounts.forVotes += numVotes;
             proposalvote.addressVoteCounts[account].forVotes += numVotes;
-        } else if (support == uint8(VoteType.Abstain)) {
-            proposalvote.proposalVoteCounts.abstainVotes += numVotes;
-            proposalvote.addressVoteCounts[account].abstainVotes += numVotes;
         } else {
             revert("GovernorVotingSimple: invalid value for enum VoteType");
         }
