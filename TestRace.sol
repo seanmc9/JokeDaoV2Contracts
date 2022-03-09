@@ -45,15 +45,6 @@ contract TestRace is Governor, GovernorSettings, GovernorCountingSimple, Governo
         return super.getVotes(account, blockNumber);
     }
 
-    function contestStart()
-        public
-        view
-        override(Governor, GovernorSettings)
-        returns (uint256)
-    {
-        return super.contestStart();
-    }
-
     function proposalThreshold()
         public
         view
