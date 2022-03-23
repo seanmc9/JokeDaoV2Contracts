@@ -25,10 +25,10 @@ abstract contract GovernorCountingSimple is Governor {
     struct ProposalVote {
         VoteCounts proposalVoteCounts;
         address[] addressesVoted;
-        mapping(address => uint256) addressTotalVoteCount;
         mapping(address => VoteCounts) addressVoteCounts;
     }
 
+    mapping(address => uint256) private _addressTotalCastVoteCounts;
     mapping(uint256 => ProposalVote) private _proposalVotes;
 
     /**
@@ -40,7 +40,7 @@ abstract contract GovernorCountingSimple is Governor {
     }
 
     /**
-     * @dev Accessor to the internal vote counts.
+     * @dev Accessor to the internal vote counts for a given proposal.
      */
     function proposalVotes(uint256 proposalId)
         public
@@ -55,7 +55,21 @@ abstract contract GovernorCountingSimple is Governor {
     }
 
     /**
-     * @dev Accessor to how many votes an address has cast.
+     * @dev Accessor to how many votes an address has cast total for the contest so far.
+     */
+    function contestAddressTotalVotesCast(address userAddress)
+        public
+        view
+        virtual
+        returns (
+            uint256 totalVotesCast
+        )
+    {
+        return (_addressTotalCastVoteCounts[userAddress]);
+    }
+
+    /**
+     * @dev Accessor to how many votes an address has cast for a given proposal.
      */
     function proposalAddressVotes(uint256 proposalId, address userAddress)
         public
@@ -96,7 +110,9 @@ abstract contract GovernorCountingSimple is Governor {
     ) internal virtual override {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 
-        require(numVotes <= (totalVotes - proposalvote.addressTotalVoteCount[account]), "GovernorVotingSimple: not enough votes left to cast");
+        require(numVotes <= (totalVotes - _addressTotalCastVoteCounts[account]), "GovernorVotingSimple: not enough votes left to cast");
+
+        bool firstTimeVoting = proposalvote.addressVoteCounts[account].forVotes == 0;
 
         if (support == uint8(VoteType.For)) {
             proposalvote.proposalVoteCounts.forVotes += numVotes;
@@ -105,9 +121,9 @@ abstract contract GovernorCountingSimple is Governor {
             revert("GovernorVotingSimple: invalid value for enum VoteType");
         }
         
-        if (proposalvote.addressTotalVoteCount[account] == 0) {  // First time voting only add that they voted
+        if (firstTimeVoting) {
             proposalvote.addressesVoted.push(account);
         }
-        proposalvote.addressTotalVoteCount[account] += numVotes;
+        _addressTotalCastVoteCounts[account] += numVotes;
     }
 }

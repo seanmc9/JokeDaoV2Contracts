@@ -27,7 +27,6 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
 
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
-    uint256[] public _proposalIds;
 
     struct ProposalCore {
         address author;
@@ -35,6 +34,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         bool exists;
     }
 
+    uint256[] private _proposalIds;
     string private _name;
     bool private _canceled;
     mapping(uint256 => ProposalCore) private _proposals;
@@ -208,8 +208,8 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
 
         emit ProposalCreated(
             proposalId,
-            _msgSender(),
-            proposalDescription
+            proposalDescription,
+            _msgSender()
         );
 
         return proposalId;
@@ -293,6 +293,8 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
         require(numVotes > 0, "GovernorVotingSimple: cannot vote with 0 or fewer votes");
 
         uint256 totalVotes = getVotes(account, contestSnapshot());
+        require(totalVotes > 0, "GovernorVotingSimple: you must have greater than 0 delegated votes at the snapshot in order to vote");
+
         _countVote(proposalId, account, support, numVotes, totalVotes);
 
         emit VoteCast(account, proposalId, support, numVotes, reason);
