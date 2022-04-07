@@ -12,37 +12,47 @@ import "../../utils/Timers.sol";
  * _Available since v4.4._
  */
 abstract contract GovernorSettings is Governor {
-    using Timers for Timers.BlockNumber;
+    uint256 private _contestStart;
     uint256 private _votingDelay;
     uint256 private _votingPeriod;
+    uint256 private _contestSnapshot;
     uint256 private _proposalThreshold;
     uint256 private _maxProposalCount;
-    Timers.BlockNumber private _voteStart;
-    address private _owner;
+    address private _creator;
 
+    event ContestStartSet(uint256 oldContestStart, uint256 newContestStart);
     event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
     event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
+    event ContestSnapshotSet(uint256 oldContestSnapshot, uint256 newContestSnapshot);
     event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold);
-    event VoteStartBlockSet(uint256 oldVoteStartBlock, uint64 newVoteStartBlock);
     event MaxProposalCountSet(uint256 oldMaxProposalCount, uint256 newMaxProposalCount);
-    event OwnerSet(address oldOwner, address newOwner);
+    event CreatorSet(address oldCreator, address newCreator);
 
     /**
      * @dev Initialize the governance parameters.
      */
     constructor(
+        uint256 initialContestStart,
         uint256 initialVotingDelay,
         uint256 initialVotingPeriod,
+        uint256 initialContestSnapshot,
         uint256 initialProposalThreshold,
-        uint64  voteStartBlock,
         uint256 initialMaxProposalCount
     ) {
+        _setContestStart(initialContestStart);
         _setVotingDelay(initialVotingDelay);
         _setVotingPeriod(initialVotingPeriod);
+        _setContestSnapshot(initialContestSnapshot);
         _setProposalThreshold(initialProposalThreshold);
-        _setVoteStart(voteStartBlock);
         _setMaxProposalCount(initialMaxProposalCount);
-        _setOwner(msg.sender);
+        _setCreator(msg.sender);
+    }
+
+    /**
+     * @dev See {IGovernor-contestStart}.
+     */
+    function contestStart() public view virtual override returns (uint256) {
+        return _contestStart;
     }
 
     /**
@@ -60,6 +70,13 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
+     * @dev See {IGovernor-contestSnapshot}.
+     */
+    function contestSnapshot() public view virtual override returns (uint256) {
+        return _contestSnapshot;
+    }
+
+    /**
      * @dev See {Governor-proposalThreshold}.
      */
     function proposalThreshold() public view virtual override returns (uint256) {
@@ -74,17 +91,20 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
-     * @dev See {IGovernor-contestStart}.
+     * @dev See {IGovernor-creator}.
      */
-    function contestStart() public view virtual override returns (uint256) {
-        return _voteStart.getDeadline();
+    function creator() public view virtual override returns (address) {
+        return _creator;
     }
 
     /**
-     * @dev See {IGovernor-owner}.
+     * @dev Internal setter for the contestStart.
+     *
+     * Emits a {ContestStartSet} event.
      */
-    function owner() public view virtual override returns (address) {
-        return _owner;
+    function _setContestStart(uint256 newContestStart) internal virtual {
+        emit ContestStartSet(_contestStart, newContestStart);
+        _contestStart = newContestStart;
     }
 
     /**
@@ -110,6 +130,16 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
+     * @dev Internal setter for the contestStart.
+     *
+     * Emits a {ContestSnapshotSet} event.
+     */
+    function _setContestSnapshot(uint256 newContestSnapshot) internal virtual {
+        emit ContestSnapshotSet(_contestSnapshot, newContestSnapshot);
+        _contestSnapshot = newContestSnapshot;
+    }
+
+    /**
      * @dev Internal setter for the proposal threshold.
      *
      * Emits a {ProposalThresholdSet} event.
@@ -130,22 +160,12 @@ abstract contract GovernorSettings is Governor {
     }
 
     /**
-     * @dev Internal setter for the voteStart.
+     * @dev Internal setter for creator.
      *
-     * Emits a {ProposalThresholdSet} event.
+     * Emits a {CreatorSet} event.
      */
-    function _setVoteStart(uint64 newVoteStartBlock) internal virtual {
-        emit VoteStartBlockSet(_voteStart.getDeadline(), newVoteStartBlock);
-        _voteStart.setDeadline(newVoteStartBlock);
-    }
-
-    /**
-     * @dev Internal setter for owner.
-     *
-     * Emits a {OwnerSet} event.
-     */
-    function _setOwner(address newOwner) internal virtual {
-        emit OwnerSet(_owner, newOwner);
-        _owner = newOwner;
+    function _setCreator(address newCreator) internal virtual {
+        emit CreatorSet(_creator, newCreator);
+        _creator = newCreator;
     }
 }

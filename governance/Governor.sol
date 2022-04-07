@@ -113,15 +113,15 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
             return ContestState.Canceled;
         }
 
-        uint256 snapshot = contestSnapshot();
+        uint256 voteStartTimestamp = voteStart();
 
-        if (snapshot >= block.number) {
+        if (voteStartTimestamp >= block.timestamp) {
             return ContestState.Queued;
         }
 
-        uint256 deadline = contestDeadline();
+        uint256 deadlineTimestamp = contestDeadline();
 
-        if (deadline >= block.number) {
+        if (deadlineTimestamp >= block.timestamp) {
             return ContestState.Active;
         }
 
@@ -136,9 +136,9 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     }
 
     /**
-     * @dev See {IGovernor-contestSnapshot}.
+     * @dev See {IGovernor-voteStart}.
      */
-    function contestSnapshot() public view virtual override returns (uint256) {
+    function voteStart() public view virtual override returns (uint256) {
         return contestStart() + votingDelay();
     }
 
@@ -146,7 +146,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
      * @dev See {IGovernor-contestDeadline}.
      */
     function contestDeadline() public view virtual override returns (uint256) {
-        return contestSnapshot() + votingPeriod();
+        return voteStart() + votingPeriod();
     }
 
     /**
@@ -216,13 +216,27 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor {
     }
 
     /**
-     * @dev Internal cancel mechanism: locks up the proposal timer, preventing it from being re-submitted. Marks it as
-     * canceled to allow distinguishing it from executed proposals.
+     * @dev Delete proposals.
      *
-     * Emits a {IGovernor-ProposalCanceled} event.
+     * Emits a {IGovernor-ProposalsDeleted} event.
+     */
+    function deleteProposals(uint256[] memory proposalIds) public virtual {
+        require(msg.sender == creator());
+        
+        for(uint index=0; index<proposalIds.length; index++){
+            _proposals[proposalIds[index]].description = "This proposal has been deleted by the creator of the contest.";
+        }
+
+        emit ProposalsDeleted(proposalIds);
+    }
+
+    /**
+     * @dev 
+     *
+     * Emits a {IGovernor-ContestCanceled} event.
      */
     function cancel() public virtual {
-        require(msg.sender == owner());
+        require(msg.sender == creator());
         
         ContestState status = state();
         
