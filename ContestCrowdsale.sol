@@ -18,6 +18,16 @@ contract ContestCrowdsale is Crowdsale, AllowanceCrowdsale, CappedCrowdsale, Pau
         TimedCrowdsale(openingTime_, closingTime_)
     {}
 
+    function pause() public {
+        require(msg.sender == tokenWallet());
+        _pause();
+    }
+
+    function unpause() public {
+        require(msg.sender == tokenWallet());
+        _unpause();
+    }
+
     // The following functions are overrides required by Solidity.
 
     function _deliverTokens(address beneficiary, uint256 tokenAmount)
